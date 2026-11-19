@@ -85,4 +85,18 @@ The output:
 Culled triangles: 8
 ```
 
+**Seeing through walls?**
+
+You might've noticed by now that even with back-face culling, that we might still see some triangles that we shouldn't, what sort of case is this? Consider the following rendering of 3 cubes spaced apart, I color each triangle differently for illustration purposes
+
+<img width="1551" height="882" alt="image" src="https://github.com/user-attachments/assets/d7c5583e-afe4-4634-95d5-29ff3504ba4c" />
+
+Now look what happens when we put all 3 of them side by side, i.e. the middle cube should be hiding the side faces of the other cubes based on perspective.
+
+<img width="1315" height="757" alt="image" src="https://github.com/user-attachments/assets/eb004826-c7f2-49a5-be23-8f81cb1d4de3" />
+
+Uh oh, seems as though we are able to see through the middle cube and see the sides of the left and right cube. This is what we will work on fixing next!
+
+
+
 </details>
