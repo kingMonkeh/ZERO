@@ -27,3 +27,7 @@ int Framebuffer::getWidth() const {
 int Framebuffer::getHeight() const {
     return this->height;
 }
+
+const Color* Framebuffer::getPixels() const {
+    return pixels.data();
+}

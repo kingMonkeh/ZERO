@@ -15,6 +15,7 @@ class Framebuffer {
     void clear(Color color);
     int getWidth() const;
     int getHeight() const;
+    const Color* getPixels() const;
 
   private:
     int width;
