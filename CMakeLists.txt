@@ -37,6 +37,7 @@ FetchContent_MakeAvailable(SDL2)
 
 add_executable(ZERO
     src/main.cpp
+    src/Rendering/Framebuffer.cpp
 )
 
 # Link SDL2
