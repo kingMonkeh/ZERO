@@ -45,8 +45,15 @@ int main(int argc, char* argv[])
 
     Framebuffer framebuffer (window_width, window_height);
 
+    Color white = {255, 255, 255};
     Color red = {255, 0, 0};
-    framebuffer.clear(red);
+    framebuffer.clear(white);
+    framebuffer.drawTriangle(
+        100, 100,
+        500, 150,
+        250, 400,
+        red
+    );
 
     std::cout << "Framebuffer created: "
               << framebuffer.getWidth() << "x"

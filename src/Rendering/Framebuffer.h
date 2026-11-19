@@ -16,6 +16,12 @@ class Framebuffer {
     int getWidth() const;
     int getHeight() const;
     const Color* getPixels() const;
+    void drawTriangle(
+        int x0, int y0,
+        int x1, int y1,
+        int x2, int y2,
+        Color color
+    );
 
   private:
     int width;
