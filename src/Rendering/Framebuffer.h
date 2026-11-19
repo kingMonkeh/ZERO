@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Math/Vec2.h"
 #include <vector>
 
 struct Color {
@@ -17,9 +18,9 @@ class Framebuffer {
     int getHeight() const;
     const Color* getPixels() const;
     void drawTriangle(
-        int x0, int y0,
-        int x1, int y1,
-        int x2, int y2,
+        const Vec2& a,
+        const Vec2& b,
+        const Vec2& c,
         Color color
     );
 

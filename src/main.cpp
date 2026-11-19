@@ -3,6 +3,7 @@
 #include <iostream>
 #include "Math/Vec3.h"
 #include "Rendering/Framebuffer.h"
+#include "Rendering/Camera.h"
 
 
 int main(int argc, char* argv[])
@@ -45,6 +46,7 @@ int main(int argc, char* argv[])
     );
 
     Framebuffer framebuffer (window_width, window_height);
+    Camera camera (90.0f);
 
     Color white = {255, 255, 255};
     Color red = {255, 0, 0};
@@ -61,6 +63,11 @@ int main(int argc, char* argv[])
         { 1,  1,  1}, // 6
         {-1,  1,  1}  // 7
     };
+
+    // Move the cube forward for testing
+    for (int i = 0; i < 8; i++) {
+        vertices[i].z += 5.0f;
+    }
 
     int triangles[][3] = {
         // Back face
@@ -88,7 +95,13 @@ int main(int argc, char* argv[])
         {3, 6, 2}
     };
 
-    
+    for (int i = 0; i < 12; i++) {
+        Vec2 p1_projected = camera.project(vertices[triangles[i][0]], window_width, window_height);
+        Vec2 p2_projected = camera.project(vertices[triangles[i][1]], window_width, window_height);
+        Vec2 p3_projected = camera.project(vertices[triangles[i][2]], window_width, window_height);
+        
+        framebuffer.drawTriangle(p1_projected, p2_projected, p3_projected, red);
+    }
 
     std::cout << "Framebuffer created: "
               << framebuffer.getWidth() << "x"

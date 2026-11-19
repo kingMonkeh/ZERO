@@ -48,11 +48,18 @@ static int edgeFunction(
 }
 
 void Framebuffer::drawTriangle(
-    int x0, int y0,
-    int x1, int y1,
-    int x2, int y2,
+    const Vec2& a,
+    const Vec2& b,
+    const Vec2& c,
     Color color
 ) {
+
+  int x0 = static_cast<int>(a.x);
+  int y0 = static_cast<int>(a.y);
+  int x1 = static_cast<int>(b.x);
+  int y1 = static_cast<int>(b.y);
+  int x2 = static_cast<int>(c.x);
+  int y2 = static_cast<int>(c.y);
 
   int min_x = std::min({x0, x1, x2});
   int max_x = std::max({x0, x1, x2});
