@@ -2,9 +2,10 @@
 #include <SDL.h>
 #include <iostream>
 #include "Math/Vec3.h"
+#include "Math/Utils.h"
 #include "Rendering/Framebuffer.h"
 #include "Rendering/Camera.h"
-
+#include "Rendering/Culling.h"
 
 int main(int argc, char* argv[])
 {
@@ -46,6 +47,8 @@ int main(int argc, char* argv[])
     );
 
     Framebuffer framebuffer (window_width, window_height);
+
+    Vec3 cameraPosition {0, 0, 0};
     Camera camera (90.0f);
 
     Color white = {255, 255, 255};
@@ -64,8 +67,19 @@ int main(int argc, char* argv[])
         {-1,  1,  1}  // 7
     };
 
-    // Move the cube forward for testing
+    // Move around the cube for testing
+        float angle = toRadians(30.0f);
+
+    float cosAngle = std::cos(angle);
+    float sinAngle = std::sin(angle);
+
     for (int i = 0; i < 8; i++) {
+        Vec3 original = vertices[i];
+
+        vertices[i].x = original.x * cosAngle + original.z * sinAngle;
+        vertices[i].z = -original.x * sinAngle + original.z * cosAngle;
+
+        // Move the rotated cube in front of the camera.
         vertices[i].z += 5.0f;
     }
 
@@ -95,13 +109,25 @@ int main(int argc, char* argv[])
         {3, 6, 2}
     };
 
+    int culled = 0;
     for (int i = 0; i < 12; i++) {
-        Vec2 p1_projected = camera.project(vertices[triangles[i][0]], window_width, window_height);
-        Vec2 p2_projected = camera.project(vertices[triangles[i][1]], window_width, window_height);
-        Vec2 p3_projected = camera.project(vertices[triangles[i][2]], window_width, window_height);
-        
+        Vec3 a = vertices[triangles[i][0]];
+        Vec3 b = vertices[triangles[i][1]];
+        Vec3 c = vertices[triangles[i][2]];
+
+        if (isBackFacing(a, b, c, cameraPosition)) {
+            culled++;
+            continue;
+        }
+
+        Vec2 p1_projected = camera.project(a, window_width, window_height);
+        Vec2 p2_projected = camera.project(b, window_width, window_height);
+        Vec2 p3_projected = camera.project(c, window_width, window_height);
+
         framebuffer.drawTriangle(p1_projected, p2_projected, p3_projected, red);
     }
+
+    std::cout << "Culled triangles: " << culled << '\n';
 
     std::cout << "Framebuffer created: "
               << framebuffer.getWidth() << "x"
