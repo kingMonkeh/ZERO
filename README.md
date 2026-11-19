@@ -33,4 +33,6 @@ For now I decided to keep things simple by creating a fixed camera at the origin
 
 All that was left was to test whether I could see my test cube,
 
+<img width="1581" height="916" alt="image" src="https://github.com/user-attachments/assets/8f4e0145-5b01-466a-b299-9b8b5dcbbc2d" />
+
 </details>
