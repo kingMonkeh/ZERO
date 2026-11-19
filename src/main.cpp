@@ -1,6 +1,7 @@
 
 #include <SDL.h>
 #include <iostream>
+#include "Math/Vec3.h"
 #include "Rendering/Framebuffer.h"
 
 
@@ -48,12 +49,46 @@ int main(int argc, char* argv[])
     Color white = {255, 255, 255};
     Color red = {255, 0, 0};
     framebuffer.clear(white);
-    framebuffer.drawTriangle(
-        100, 100,
-        500, 150,
-        250, 400,
-        red
-    );
+    
+    Vec3 vertices[] = {
+        {-1, -1, -1}, // 0
+        { 1, -1, -1}, // 1
+        { 1,  1, -1}, // 2
+        {-1,  1, -1}, // 3
+
+        {-1, -1,  1}, // 4
+        { 1, -1,  1}, // 5
+        { 1,  1,  1}, // 6
+        {-1,  1,  1}  // 7
+    };
+
+    int triangles[][3] = {
+        // Back face
+        {0, 2, 1},
+        {0, 3, 2},
+
+        // Front face
+        {4, 5, 6},
+        {4, 6, 7},
+
+        // Left face
+        {0, 4, 7},
+        {0, 7, 3},
+
+        // Right face
+        {1, 2, 6},
+        {1, 6, 5},
+
+        // Bottom face
+        {0, 1, 5},
+        {0, 5, 4},
+
+        // Top face
+        {3, 7, 6},
+        {3, 6, 2}
+    };
+
+    
 
     std::cout << "Framebuffer created: "
               << framebuffer.getWidth() << "x"
