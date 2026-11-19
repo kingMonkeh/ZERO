@@ -1,6 +1,11 @@
 
 #include <SDL.h>
 #include <iostream>
+#include <vector>
+#include "Geometry/Cube.h"
+#include "Geometry/Mesh.h"
+#include "Geometry/SceneObject.h"
+#include "Math/Transform.h"
 #include "Math/Vec3.h"
 #include "Math/Utils.h"
 #include "Rendering/Framebuffer.h"
@@ -51,80 +56,52 @@ int main(int argc, char* argv[])
     Vec3 cameraPosition {0, 0, 0};
     Camera camera (90.0f);
 
-    Color white = {255, 255, 255};
     Color red = {255, 0, 0};
+    Color blue = {0, 255, 0};
+    Color green = {0, 0, 255};
+    Color colors [3] = {red, blue, green};
+
+    Color white = {255, 255, 255};
     framebuffer.clear(white);
-    
-    Vec3 vertices[] = {
-        {-1, -1, -1}, // 0
-        { 1, -1, -1}, // 1
-        { 1,  1, -1}, // 2
-        {-1,  1, -1}, // 3
 
-        {-1, -1,  1}, // 4
-        { 1, -1,  1}, // 5
-        { 1,  1,  1}, // 6
-        {-1,  1,  1}  // 7
-    };
+    std::vector<SceneObject> objects;
+    objects.push_back({createCube(), {0, 0, 5}, 0.0f});
+    objects.push_back({createCube(), {2, 0, 5}, 0.0f});
+    objects.push_back({createCube(), {-2, 0, 5}, 0.0f});
 
-    // Move around the cube for testing
-        float angle = toRadians(30.0f);
-
-    float cosAngle = std::cos(angle);
-    float sinAngle = std::sin(angle);
-
-    for (int i = 0; i < 8; i++) {
-        Vec3 original = vertices[i];
-
-        vertices[i].x = original.x * cosAngle + original.z * sinAngle;
-        vertices[i].z = -original.x * sinAngle + original.z * cosAngle;
-
-        // Move the rotated cube in front of the camera.
-        vertices[i].z += 5.0f;
-    }
-
-    int triangles[][3] = {
-        // Back face
-        {0, 2, 1},
-        {0, 3, 2},
-
-        // Front face
-        {4, 5, 6},
-        {4, 6, 7},
-
-        // Left face
-        {0, 4, 7},
-        {0, 7, 3},
-
-        // Right face
-        {1, 2, 6},
-        {1, 6, 5},
-
-        // Bottom face
-        {0, 1, 5},
-        {0, 5, 4},
-
-        // Top face
-        {3, 7, 6},
-        {3, 6, 2}
-    };
-
+    int colorPicker = 0;
     int culled = 0;
-    for (int i = 0; i < 12; i++) {
-        Vec3 a = vertices[triangles[i][0]];
-        Vec3 b = vertices[triangles[i][1]];
-        Vec3 c = vertices[triangles[i][2]];
+    // Draw all objects
+    for (const SceneObject& object : objects) {
 
-        if (isBackFacing(a, b, c, cameraPosition)) {
-            culled++;
-            continue;
+        const Mesh& mesh = object.mesh;
+        std::vector<Vec3> transformedVertices;
+
+        for (const Vec3& vertex : mesh.vertices) {
+            Vec3 rotated = rotateY(vertex, object.rotationY);
+            Vec3 transformed = translate(rotated, object.position);
+            transformedVertices.push_back(transformed);
         }
 
-        Vec2 p1_projected = camera.project(a, window_width, window_height);
-        Vec2 p2_projected = camera.project(b, window_width, window_height);
-        Vec2 p3_projected = camera.project(c, window_width, window_height);
+        for (const Triangle& triangle : mesh.triangles) {
+            Vec3 a = transformedVertices[triangle.a];
+            Vec3 b = transformedVertices[triangle.b];
+            Vec3 c = transformedVertices[triangle.c];
 
-        framebuffer.drawTriangle(p1_projected, p2_projected, p3_projected, red);
+            if (isBackFacing(a, b, c, cameraPosition)) {
+                culled++;
+                continue;
+            }
+
+            Vec2 p1_projected = camera.project(a, window_width, window_height);
+            Vec2 p2_projected = camera.project(b, window_width, window_height);
+            Vec2 p3_projected = camera.project(c, window_width, window_height);
+
+            framebuffer.drawTriangle(p1_projected, p2_projected, p3_projected, colors[colorPicker++]);
+            colorPicker %= 3;
+
+        }
+
     }
 
     std::cout << "Culled triangles: " << culled << '\n';
