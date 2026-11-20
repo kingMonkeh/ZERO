@@ -54,8 +54,9 @@ int main(int argc, char* argv[])
 
     Framebuffer framebuffer (window_width, window_height);
 
-    Vec3 cameraPosition {0, 0, 0};
-    Camera camera (90.0f);
+    Vec3 cameraPosition {3, 3, 0};
+    Vec3 cameraRotation {0, 0, 0};
+    Camera camera (90.0f, cameraPosition, cameraRotation);
 
     Color red = {255, 0, 0};
     Color blue = {0, 255, 0};
@@ -66,10 +67,10 @@ int main(int argc, char* argv[])
     framebuffer.clear(white);
 
     std::vector<SceneObject> objects;
-    objects.push_back({loadBinarySTL(R"(C:\Users\gamer\Documents\GitHub\ZERO\porolick.stl)"), {0, 0, 300}, {toRadians(270.0f), toRadians(0.0f), toRadians(0.0f)}, {0.1f, 0.1f, 0.1f}});
-    // objects.push_back({createCube(), {0, 0, 5}, 0.0f, {1.0f, 1.0f, 1.0f}});
-    // objects.push_back({createCube(), {2, 0, 5}, 0.0f, {1.0f, 1.0f, 1.0f}});
-    // objects.push_back({createCube(), {-2, 0, 5}, 0.0f, {1.0f, 1.0f, 1.0f}});
+    // objects.push_back({loadBinarySTL(R"(C:\Users\gamer\Documents\GitHub\ZERO\porolick.stl)"), {0, 0, 300}, {toRadians(270.0f), toRadians(0.0f), toRadians(0.0f)}, {0.1f, 0.1f, 0.1f}});
+    objects.push_back({createCube(), {0, 0, 5}, {toRadians(270.0f), toRadians(0.0f), toRadians(0.0f)}, {1.0f, 1.0f, 1.0f}});
+    objects.push_back({createCube(), {2, 0, 5}, {toRadians(270.0f), toRadians(0.0f), toRadians(0.0f)}, {1.0f, 1.0f, 1.0f}});
+    objects.push_back({createCube(), {-2, 0, 5}, {toRadians(270.0f), toRadians(0.0f), toRadians(0.0f)}, {1.0f, 1.0f, 1.0f}});
 
     int colorPicker = 0;
     int culled = 0;
@@ -80,20 +81,20 @@ int main(int argc, char* argv[])
         std::vector<Vec3> transformedVertices;
 
         for (const Vec3& vertex : mesh.vertices) {
-            Vec3 rotated = rotateX(vertex, object.rotation.x);
+            Vec3 scaled = scale(vertex, object.scale);
+            Vec3 rotated = rotateX(scaled, object.rotation.x);
             rotated = rotateY(rotated, object.rotation.y);
             rotated = rotateZ(rotated, object.rotation.z);
             Vec3 translated = translate(rotated, object.position);
-            Vec3 scaled = scale(translated, object.scale);
-            transformedVertices.push_back(scaled);
+            transformedVertices.push_back(translated);
         }
 
         for (const Triangle& triangle : mesh.triangles) {
-            Vec3 a = transformedVertices[triangle.a];
-            Vec3 b = transformedVertices[triangle.b];
-            Vec3 c = transformedVertices[triangle.c];
+            Vec3 a = camera.worldToCamera(transformedVertices[triangle.a]);
+            Vec3 b = camera.worldToCamera(transformedVertices[triangle.b]);
+            Vec3 c = camera.worldToCamera(transformedVertices[triangle.c]);
 
-            if (isBackFacing(a, b, c, cameraPosition)) {
+            if (isBackFacing(a, b, c, {0, 0, 0})) {
                 culled++;
                 continue;
             }
