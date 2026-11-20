@@ -66,10 +66,10 @@ int main(int argc, char* argv[])
     framebuffer.clear(white);
 
     std::vector<SceneObject> objects;
-    objects.push_back({loadBinarySTL(R"(C:\Users\gamer\Documents\GitHub\ZERO\porolick.stl)"), {0, 2, 5}, 0.0f});
-    // objects.push_back({createCube(), {0, 0, 5}, 0.0f});
-    // objects.push_back({createCube(), {2, 0, 5}, 0.0f});
-    // objects.push_back({createCube(), {-2, 0, 5}, 0.0f});
+    objects.push_back({loadBinarySTL(R"(C:\Users\gamer\Documents\GitHub\ZERO\porolick.stl)"), {0, 0, 300}, {toRadians(270.0f), toRadians(0.0f), toRadians(0.0f)}, {0.1f, 0.1f, 0.1f}});
+    // objects.push_back({createCube(), {0, 0, 5}, 0.0f, {1.0f, 1.0f, 1.0f}});
+    // objects.push_back({createCube(), {2, 0, 5}, 0.0f, {1.0f, 1.0f, 1.0f}});
+    // objects.push_back({createCube(), {-2, 0, 5}, 0.0f, {1.0f, 1.0f, 1.0f}});
 
     int colorPicker = 0;
     int culled = 0;
@@ -80,9 +80,12 @@ int main(int argc, char* argv[])
         std::vector<Vec3> transformedVertices;
 
         for (const Vec3& vertex : mesh.vertices) {
-            Vec3 rotated = rotateY(vertex, object.rotationY);
-            Vec3 transformed = translate(rotated, object.position);
-            transformedVertices.push_back(transformed);
+            Vec3 rotated = rotateX(vertex, object.rotation.x);
+            rotated = rotateY(rotated, object.rotation.y);
+            rotated = rotateZ(rotated, object.rotation.z);
+            Vec3 translated = translate(rotated, object.position);
+            Vec3 scaled = scale(translated, object.scale);
+            transformedVertices.push_back(scaled);
         }
 
         for (const Triangle& triangle : mesh.triangles) {

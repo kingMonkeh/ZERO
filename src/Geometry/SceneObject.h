@@ -6,5 +6,6 @@
 struct SceneObject {
     Mesh mesh;
     Vec3 position;
-    float rotationY;
+    Vec3 rotation;
+    Vec3 scale;
 };
