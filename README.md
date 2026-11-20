@@ -157,6 +157,8 @@ Note: we do not actually move the objects in world space. We make a copy of the 
 
 After adding in some basic camera movement and rotation using delta time approach (ie speed depends on total time elapsed rather than the # of frames rendered). We are now able to move around our scene!
 
+https://github.com/user-attachments/assets/cec2cfaf-9e16-4449-9178-f5862d79a9b1
+
 
 
 </details>
