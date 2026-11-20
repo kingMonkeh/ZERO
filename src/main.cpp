@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include <iostream>
 #include <vector>
+#include "Loading/STLLoader.h"
 #include "Geometry/Cube.h"
 #include "Geometry/Mesh.h"
 #include "Geometry/SceneObject.h"
@@ -65,9 +66,10 @@ int main(int argc, char* argv[])
     framebuffer.clear(white);
 
     std::vector<SceneObject> objects;
-    objects.push_back({createCube(), {0, 0, 5}, 0.0f});
-    objects.push_back({createCube(), {2, 0, 5}, 0.0f});
-    objects.push_back({createCube(), {-2, 0, 5}, 0.0f});
+    objects.push_back({loadBinarySTL(R"(C:\Users\gamer\Documents\GitHub\ZERO\porolick.stl)"), {0, 2, 5}, 0.0f});
+    // objects.push_back({createCube(), {0, 0, 5}, 0.0f});
+    // objects.push_back({createCube(), {2, 0, 5}, 0.0f});
+    // objects.push_back({createCube(), {-2, 0, 5}, 0.0f});
 
     int colorPicker = 0;
     int culled = 0;

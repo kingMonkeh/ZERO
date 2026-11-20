@@ -37,6 +37,7 @@ FetchContent_MakeAvailable(SDL2)
 
 add_executable(ZERO
     src/main.cpp
+    src/Loading/STLLoader.cpp
     src/Rendering/Camera.cpp
     src/Rendering/Culling.cpp
     src/Rendering/Framebuffer.cpp
