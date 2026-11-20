@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
             Vec2 p2_projected = camera.project(b, window_width, window_height);
             Vec2 p3_projected = camera.project(c, window_width, window_height);
 
-            framebuffer.drawTriangle(p1_projected, p2_projected, p3_projected, colors[colorPicker++]);
+            framebuffer.drawTriangle(p1_projected, p2_projected, p3_projected, a.z, b.z, c.z, colors[colorPicker++]);
             colorPicker %= 3;
 
         }

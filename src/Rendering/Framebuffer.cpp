@@ -1,10 +1,12 @@
 #include <algorithm>
+#include <limits>
 #include "Framebuffer.h"
 
 Framebuffer::Framebuffer(int width, int height) : 
   width(width), 
   height(height), 
-  pixels(width * height) {}
+  pixels(width * height),
+  depthBuffer(width * height, std::numeric_limits<float>::infinity()) {}
 
 void Framebuffer::setPixel(int x, int y, Color color) {
   if (x < 0 || x >= this->width || y < 0 || y >= this->height) {
@@ -18,6 +20,7 @@ void Framebuffer::setPixel(int x, int y, Color color) {
 void Framebuffer::clear(Color color) {
     for (size_t i = 0; i < this->pixels.size(); i++) {
         this->pixels[i] = color;
+        this->depthBuffer[i] = std::numeric_limits<float>::infinity();
     }
 }
 
@@ -51,6 +54,9 @@ void Framebuffer::drawTriangle(
     const Vec2& a,
     const Vec2& b,
     const Vec2& c,
+    float zA,
+    float zB,
+    float zC,
     Color color
 ) {
 
@@ -88,7 +94,19 @@ void Framebuffer::drawTriangle(
         inside = sideAB <= 0 && sideBC <= 0 && sideCA <= 0;
       }
 
-      if (inside) {
+      if (!inside) {
+        continue;
+      }
+
+      float alpha = static_cast<float>(sideBC) / orientation;
+      float beta  = static_cast<float>(sideCA) / orientation;
+      float gamma = static_cast<float>(sideAB) / orientation;
+
+      float depth = 1.0f / (alpha / zA + beta / zB + gamma / zC);
+      
+      int bufferIndex = y * width + x;
+      if (depth < this->depthBuffer[bufferIndex]) {
+        depthBuffer[bufferIndex] = depth;
         setPixel(x, y, color);
       }
     }

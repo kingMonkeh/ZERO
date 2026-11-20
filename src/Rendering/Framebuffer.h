@@ -21,6 +21,9 @@ class Framebuffer {
         const Vec2& a,
         const Vec2& b,
         const Vec2& c,
+        float zA,
+        float zB,
+        float zC,
         Color color
     );
 
@@ -28,5 +31,5 @@ class Framebuffer {
     int width;
     int height;
     std::vector<Color> pixels;
-
+    std::vector<float> depthBuffer;
 };

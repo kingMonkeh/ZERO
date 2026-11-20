@@ -85,6 +85,14 @@ The output:
 Culled triangles: 8
 ```
 
+**Detour: Creating Scenes**
+
+At the time of writing, I was manually creating a cube in main by defining all of its vertices and defining each triangle that connected the vertices. This worked but it was very hard to add more cubes and easily transform/rotate them, instead it was time to abstract things a bit, to support the rendering of arbitrary objects. To this end we now consider scenes.
+
+Suppose I want to render a bunch of different objects, how do i represent each object in a way that my renderer can calculate them all without caring about the objects itself? The idea is to create a SceneObject, a SceneObject tells information on its position and rotation, it also holds the underlying mesh. A mesh is essentially the representation of the object we are trying to render. It is primarily composed of the list of vertices, and the triangles that connect those vertices. The mesh describes the underlying shape, whereas the SceneObject dictates where the shape will be rendered in the scene and how it will be scaled. Ie a big cube and a small cube are both cubes, they share an underlying cube mesh, but their positions and transformations may be different afterwards.
+
+With that, a scene is simply a collection of SceneObjects, all the renderer cares about is that it accepts triangles, it doesnt need to know anything else.
+
 **Seeing through walls?**
 
 You might've noticed by now that even with back-face culling, that we might still see some triangles that we shouldn't, what sort of case is this? Consider the following rendering of 3 cubes spaced apart, I color each triangle differently for illustration purposes
@@ -97,6 +105,34 @@ Now look what happens when we put all 3 of them side by side, i.e. the middle cu
 
 Uh oh, seems as though we are able to see through the middle cube and see the sides of the left and right cube. This is what we will work on fixing next!
 
+Think about two triangles fighting over a pixel, it follows that whichever triangle is closer to the camera should get priority. This is the idea behind a Z buffer, essentially we will extend our framebuffer to also store the depth of the point in 3D space  being drawn at a specific pixel, it follows then that we can only draw on a pixel if the incoming depth is closer than what was previously drawn there.
 
+How do we calculate depth? The first thing we need to learn is barycentric coordinates, essentially suppose we know a point P is inside a 2D triangle ABC, then we note that P can be represented as a linear combination of the A + u(B - A) + v(C - A).
+
+We can expand this equation to get:
+
+P = (1 - u - v)A + uB + vC
+
+If we let a = (1 - u - v), b = u, c = v
+
+Then we have that
+
+P = aA + bB + cC
+
+These are called barycentric coordinates. Essentially, we're representing a point inside a triangle as a weighted combination of its three vertices. One interesting property is that these weights will always add up to 1, which follows directly from how we defined them
+
+a + b + c = (1 - u - v) + u + v = 1
+
+The cool part is that we can use our existing edge functions to calculate the barycentric coordinates of each pixel using the three projected vertices. This tells us where the pixel lies relative to the triangle in 2D screen space. However, we can't directly use these values to get the original 3D depth. This is because perspective projection distorts distances, ie a point halfway along a 3D edge doesn't necessarily appear halfway along its projected 2D edge.
+
+We therefore need to account for perspective when converting our 2D barycentric coordinates into their 3D equivalents. After some complicated math, we get the following depth formula:
+
+P.z (3D) = 1 / (
+a / A.z + 
+b / B.z + 
+c / C.z
+)
+
+Here, a, b, and c are our 2D screen-space barycentric coordinates, while A.z, B.z and C.z are the original depths of the triangle's 3D vertices. With this we can now calculate the depth of any pixel covered by a triangle without needing to reconstruct its full 3D position.
 
 </details>
