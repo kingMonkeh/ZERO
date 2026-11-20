@@ -137,7 +137,12 @@ Here, a, b, and c are our 2D screen-space barycentric coordinates, while A.z, B.
 
 After implementing we can see it's working!
 
-<img width="1533" height="816" alt="image" src="https://github.com/user-attachments/assets/418208d3-3ffe-4084-9b8c-60319b79e9b8" />
+Before (drawing on top of each other):
 
+<img width="1290" height="652" alt="image" src="https://github.com/user-attachments/assets/6beff95a-3a3c-433a-a22f-aad2f9995644" />
+
+After (Middle cube gets depth priority):
+
+<img width="968" height="521" alt="image" src="https://github.com/user-attachments/assets/223dacff-796b-49f6-b1a7-ff487026ac9f" />
 
 </details>
