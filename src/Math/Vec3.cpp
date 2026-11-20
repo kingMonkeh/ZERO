@@ -1,4 +1,5 @@
 #include "Vec3.h"
+#include <cmath>
 
 Vec3 Vec3::operator+(const Vec3& other) const {
   return Vec3{this->x + other.x, this->y + other.y, this->z + other.z};
@@ -26,4 +27,12 @@ Vec3 Vec3::cross(const Vec3& other) const {
 
 float Vec3::dot(const Vec3& other) const {
   return this->x * other.x + this->y * other.y + this->z * other.z;
+}
+
+float Vec3::length() const {
+    return std::sqrt(x * x + y * y + z * z);
+}
+
+Vec3 Vec3::normalized() const {
+    return *this / length();
 }

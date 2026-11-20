@@ -64,7 +64,6 @@ int main(int argc, char* argv[])
     Color colors [3] = {red, blue, green};
 
     Color white = {255, 255, 255};
-    framebuffer.clear(white);
 
     std::vector<SceneObject> objects;
     // objects.push_back({loadBinarySTL(R"(C:\Users\gamer\Documents\GitHub\ZERO\porolick.stl)"), {0, 0, 300}, {toRadians(270.0f), toRadians(0.0f), toRadians(0.0f)}, {0.1f, 0.1f, 0.1f}});
@@ -72,58 +71,94 @@ int main(int argc, char* argv[])
     objects.push_back({createCube(), {2, 0, 5}, {toRadians(270.0f), toRadians(0.0f), toRadians(0.0f)}, {1.0f, 1.0f, 1.0f}});
     objects.push_back({createCube(), {-2, 0, 5}, {toRadians(270.0f), toRadians(0.0f), toRadians(0.0f)}, {1.0f, 1.0f, 1.0f}});
 
-    int colorPicker = 0;
-    int culled = 0;
-    // Draw all objects
-    for (const SceneObject& object : objects) {
-
-        const Mesh& mesh = object.mesh;
-        std::vector<Vec3> transformedVertices;
-
-        for (const Vec3& vertex : mesh.vertices) {
-            Vec3 scaled = scale(vertex, object.scale);
-            Vec3 rotated = rotateX(scaled, object.rotation.x);
-            rotated = rotateY(rotated, object.rotation.y);
-            rotated = rotateZ(rotated, object.rotation.z);
-            Vec3 translated = translate(rotated, object.position);
-            transformedVertices.push_back(translated);
-        }
-
-        for (const Triangle& triangle : mesh.triangles) {
-            Vec3 a = camera.worldToCamera(transformedVertices[triangle.a]);
-            Vec3 b = camera.worldToCamera(transformedVertices[triangle.b]);
-            Vec3 c = camera.worldToCamera(transformedVertices[triangle.c]);
-
-            if (isBackFacing(a, b, c, {0, 0, 0})) {
-                culled++;
-                continue;
-            }
-
-            Vec2 p1_projected = camera.project(a, window_width, window_height);
-            Vec2 p2_projected = camera.project(b, window_width, window_height);
-            Vec2 p3_projected = camera.project(c, window_width, window_height);
-
-            framebuffer.drawTriangle(p1_projected, p2_projected, p3_projected, a.z, b.z, c.z, colors[colorPicker++]);
-            colorPicker %= 3;
-
-        }
-
-    }
-
-    std::cout << "Culled triangles: " << culled << '\n';
-
     std::cout << "Framebuffer created: "
               << framebuffer.getWidth() << "x"
               << framebuffer.getHeight() << '\n';
 
     bool running = true;
     SDL_Event event;
+    Uint64 previousCounter = SDL_GetPerformanceCounter();
 
     while (running) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT)
                 running = false;
         }
+
+        // Compute delta time
+
+        Uint64 currentCounter = SDL_GetPerformanceCounter();
+        float deltaTime = static_cast<float>(currentCounter - previousCounter) / SDL_GetPerformanceFrequency();
+        previousCounter = currentCounter;
+
+        // Read keyboard input
+
+        const Uint8* keyboardState = SDL_GetKeyboardState(nullptr);
+        Vec3 movement{0, 0, 0};
+        if (keyboardState[SDL_SCANCODE_W]) movement.z += 1;
+        if (keyboardState[SDL_SCANCODE_S]) movement.z -= 1;
+        if (keyboardState[SDL_SCANCODE_A]) movement.x -= 1;
+        if (keyboardState[SDL_SCANCODE_D]) movement.x += 1;
+        if (keyboardState[SDL_SCANCODE_SPACE]) movement.y += 1;
+        if (keyboardState[SDL_SCANCODE_LSHIFT]) movement.y -= 1;
+
+        if (movement.length() > 0.0f) {
+            movement = movement.normalized();
+        }
+
+        camera.move(movement * 5.0f * deltaTime);
+
+        Vec3 rotation{0, 0, 0};
+        if (keyboardState[SDL_SCANCODE_I]) rotation.x -= 1;
+        if (keyboardState[SDL_SCANCODE_K]) rotation.x += 1;
+        if (keyboardState[SDL_SCANCODE_J]) rotation.y -= 1;
+        if (keyboardState[SDL_SCANCODE_L]) rotation.y += 1;
+
+        camera.rotateBy(rotation * 1.5f * deltaTime);
+
+        // Render scene
+
+        framebuffer.clear(white);
+
+        int colorPicker = 0;
+        int culled = 0;
+
+        for (const SceneObject& object : objects) {
+
+            const Mesh& mesh = object.mesh;
+            std::vector<Vec3> transformedVertices;
+
+            for (const Vec3& vertex : mesh.vertices) {
+                Vec3 scaled = scale(vertex, object.scale);
+                Vec3 rotated = rotateX(scaled, object.rotation.x);
+                rotated = rotateY(rotated, object.rotation.y);
+                rotated = rotateZ(rotated, object.rotation.z);
+                Vec3 translated = translate(rotated, object.position);
+                transformedVertices.push_back(translated);
+            }
+
+            for (const Triangle& triangle : mesh.triangles) {
+                Vec3 a = camera.worldToCamera(transformedVertices[triangle.a]);
+                Vec3 b = camera.worldToCamera(transformedVertices[triangle.b]);
+                Vec3 c = camera.worldToCamera(transformedVertices[triangle.c]);
+
+                if (isBackFacing(a, b, c, {0, 0, 0})) {
+                    culled++;
+                    continue;
+                }
+
+                Vec2 p1_projected = camera.project(a, window_width, window_height);
+                Vec2 p2_projected = camera.project(b, window_width, window_height);
+                Vec2 p3_projected = camera.project(c, window_width, window_height);
+
+                framebuffer.drawTriangle(p1_projected, p2_projected, p3_projected, a.z, b.z, c.z, colors[colorPicker++]);
+                colorPicker %= 3;
+
+            }
+
+        }
+
+        // Display framebuffer
 
         SDL_UpdateTexture(
           texture,
@@ -137,6 +172,8 @@ int main(int argc, char* argv[])
         SDL_RenderPresent(renderer);
     }
 
+    SDL_DestroyTexture(texture);
+    SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 

@@ -30,3 +30,12 @@ Vec3 Camera::worldToCamera(const Vec3& worldPoint) const {
 
   return rotated;
 }
+
+void Camera::move(const Vec3& localMovement) {
+  Vec3 worldMovement = rotateY(localMovement, rotation.y);
+  position = position + worldMovement;
+}
+
+void Camera::rotateBy(const Vec3& rotationDelta) {
+  rotation = rotation + rotationDelta;
+}

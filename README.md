@@ -145,4 +145,18 @@ After (Middle cube gets depth priority):
 
 <img width="968" height="521" alt="image" src="https://github.com/user-attachments/assets/223dacff-796b-49f6-b1a7-ff487026ac9f" />
 
+**Another detour: Camera movement**
+
+Currently everything has been built with a fixed camera at (0, 0, 0) facing in the positive Z direction. But obviously as people we move around and see stuff from different angles, so our camera should be able to move as well.
+
+The first question that comes to mind, is if our camera is now in a different position, potentially facing in different directions as well, then how do we tell what objects the camera can see? Well it turns out the answer is much simpler than we thought, instead of trying to do all the calculations directly assuming the camera is in an arbitrary position, we can instead claim that the origin is wherever the camera is curretly. More specifically we mark wherever the camera is as the origin of the camera space, which is different from the original world space of our scene. Afterwards, we assume the camerea is facing in the positive Z direction in camera space. It follows then that in camera space, our camera could function the exact same way it functions currently with a fixed camera.
+
+Now the question is, how do know where the objects will be in camera space? I.e. how do we map objects in our scene from world space to camera space? Well the answer is surprisingly simple, for raw position differences, we can just translate all world objects to match correctly in our camera space. For rotations the idea is quite similar, imagine youre facing a box, and then you turn left, one way to interpret this is you turned left from the box, another way is that the box had turned right from you. It follows then that if we use the second interpretation, then if we fix our camera is rotated however much left, then we can just keep our camera still and rotate the box however much right. This is the idea of inverse rotations. After performing all such operations, we should now have a camera space where our camera is functionally the same as our original fixed camera, and the objects in the world have been mapped accordingly. 
+
+Note: we do not actually move the objects in world space. We make a copy of the world space and we transform the copy to achieve our camera space for rendering purposes.
+
+After adding in some basic camera movement and rotation using delta time approach (ie speed depends on total time elapsed rather than the # of frames rendered). We are now able to move around our scene!
+
+
+
 </details>
