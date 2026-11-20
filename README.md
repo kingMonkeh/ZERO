@@ -135,4 +135,9 @@ c / C.z
 
 Here, a, b, and c are our 2D screen-space barycentric coordinates, while A.z, B.z and C.z are the original depths of the triangle's 3D vertices. With this we can now calculate the depth of any pixel covered by a triangle without needing to reconstruct its full 3D position.
 
+After implementing we can see it's working!
+
+<img width="1533" height="816" alt="image" src="https://github.com/user-attachments/assets/418208d3-3ffe-4084-9b8c-60319b79e9b8" />
+
+
 </details>
