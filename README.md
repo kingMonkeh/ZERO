@@ -8,10 +8,7 @@ cmake --build build --config Debug
 
 .\build\Debug\ZERO.exe
 
-<details>
-<summary style="margin-bottom: 2rem;"> 
-  <h2 style="display:inline;">My Learning</h2>
-</summary>
+<h2 style="display:inline; margin-bottom: 2rem;">My Learning</h2>
 
 **First Steps**
 
@@ -171,6 +168,5 @@ If it only has 1 vertex infront of the near plane, this case is simple, after cl
 
 With this, we are ready to implement near-plane clipping which will solve a lot of issues!
 
+https://github.com/user-attachments/assets/04f12a25-3d79-493b-a21e-b5fd5a3dbee7
 
-
-</details>
