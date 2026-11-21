@@ -11,6 +11,7 @@
 #include "Math/Utils.h"
 #include "Rendering/Framebuffer.h"
 #include "Rendering/Camera.h"
+#include "Rendering/Clipping.h"
 #include "Rendering/Culling.h"
 
 int main(int argc, char* argv[])
@@ -54,9 +55,10 @@ int main(int argc, char* argv[])
 
     Framebuffer framebuffer (window_width, window_height);
 
+    float cameraNearPlane = 0.1f;
     Vec3 cameraPosition {3, 3, 0};
     Vec3 cameraRotation {0, 0, 0};
-    Camera camera (90.0f, cameraPosition, cameraRotation);
+    Camera camera (90.0f, cameraNearPlane, cameraPosition, cameraRotation);
 
     Color red = {255, 0, 0};
     Color blue = {0, 255, 0};
@@ -138,21 +140,31 @@ int main(int argc, char* argv[])
             }
 
             for (const Triangle& triangle : mesh.triangles) {
-                Vec3 a = camera.worldToCamera(transformedVertices[triangle.a]);
-                Vec3 b = camera.worldToCamera(transformedVertices[triangle.b]);
-                Vec3 c = camera.worldToCamera(transformedVertices[triangle.c]);
+                Triangle3D cameraSpaceTriangle {
+                    camera.worldToCamera(transformedVertices[triangle.a]),
+                    camera.worldToCamera(transformedVertices[triangle.b]),
+                    camera.worldToCamera(transformedVertices[triangle.c])
+                };
 
-                if (isBackFacing(a, b, c, {0, 0, 0})) {
-                    culled++;
-                    continue;
+                std::vector<Triangle3D> clippedTriangles = clipTriangleAgainstNearPlane(cameraSpaceTriangle, camera.getNearPlane());
+
+                for (const Triangle3D& clippedTriangle : clippedTriangles) {
+                    if (isBackFacing(clippedTriangle.a, clippedTriangle.b, clippedTriangle.c, {0, 0, 0})) {
+                        culled++;
+                        continue;
+                    }
+
+                    Vec2 p1_projected = camera.project(clippedTriangle.a, window_width, window_height);
+                    Vec2 p2_projected = camera.project(clippedTriangle.b, window_width, window_height);
+                    Vec2 p3_projected = camera.project(clippedTriangle.c, window_width, window_height);
+
+                    framebuffer.drawTriangle(
+                        p1_projected, p2_projected, p3_projected, 
+                        clippedTriangle.a.z, clippedTriangle.b.z, clippedTriangle.c.z, colors[colorPicker++]
+                    );
+                    
+                    colorPicker %= 3;
                 }
-
-                Vec2 p1_projected = camera.project(a, window_width, window_height);
-                Vec2 p2_projected = camera.project(b, window_width, window_height);
-                Vec2 p3_projected = camera.project(c, window_width, window_height);
-
-                framebuffer.drawTriangle(p1_projected, p2_projected, p3_projected, a.z, b.z, c.z, colors[colorPicker++]);
-                colorPicker %= 3;
 
             }
 

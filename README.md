@@ -159,6 +159,18 @@ After adding in some basic camera movement and rotation using delta time approac
 
 https://github.com/user-attachments/assets/cec2cfaf-9e16-4449-9178-f5862d79a9b1
 
+**Near-Plane Clipping**
+
+If you paid attention to the video, you might have noticed that whenever I got too close to the cube or when I went inside it, the screen just became a mess of triangles. This is because currently I draw all triangles whose surface is facing the camera, that includes triangles that are behind us as well (I didn't show it but if you just turn around 180 from the cubes, they will render on your screen even though you're facing away from them). 
+
+A simple solution you may think of is to just remove all triangles who are behind us. But there is a special case worth considering. Suppose there is a triangle who is partially behind the camera, i.e. it it has a vertex in front of the camera and behind the camera. It follows we should only see part of the triangle in this case.
+
+To this end, we introduce a near-plane, similar to our image plane, we add another plane who's very close to the camera, i.e. z = 0.1. And the idea is that anything that goes behind this plane gets clipped. Let's now consider the idea of the partially clipped triangle. It follows that if its partially clipped, it either has 1 or 2 vertices infront of the near-plane.
+
+If it only has 1 vertex infront of the near plane, this case is simple, after clipping it at the near-plane, it will just produce a new, but smaller triangle. On the other hand, if there are 2 vertices in front of the plane, after clipping we will end up with a quadrilateral! In this case we must break it up back into triangles which our renderer supports, thankfully this case is not too bad since we cut across the diagonal. We note that the order of the vertices of the new triangles we return is important due to the winding directions we discussed earlier when performing triangle rasterization and back-face culling.
+
+With this, we are ready to implement near-plane clipping which will solve a lot of issues!
+
 
 
 </details>

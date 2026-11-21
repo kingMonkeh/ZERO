@@ -3,7 +3,8 @@
 #include "../Math/Utils.h"
 #include <cmath>
 
-Camera::Camera(float fov, Vec3 position, Vec3 rotation) : fov(fov), position{position}, rotation{rotation} {}
+Camera::Camera(float fov, float nearPlane, Vec3 position, Vec3 rotation) : 
+  fov(fov), nearPlane(nearPlane), position{position}, rotation{rotation} {}
 
 Vec2 Camera::project(const Vec3& point, int viewportWidth, int viewportHeight) const {
   float fovRadians = toRadians(fov);
@@ -38,4 +39,8 @@ void Camera::move(const Vec3& localMovement) {
 
 void Camera::rotateBy(const Vec3& rotationDelta) {
   rotation = rotation + rotationDelta;
+}
+
+float Camera::getNearPlane() {
+  return nearPlane;
 }
