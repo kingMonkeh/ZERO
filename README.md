@@ -181,3 +181,6 @@ Think about a flashlight, if you shine it straight at a wall, it will be very br
 With this in mind, we now have the intensity of light. We now assume the existence of directional light, ie just assume there is some extremely powerful light that sends all of its light rays in the same direction, kinda like the sun since it is so far from us. Lastly, we also assume flat shading, ie you assume the intensity of light is the same for all the points on a triangle, which is why we only needed the triangles normal. This is not the most realistic and is probably what you see in old school video games.
 
 With all this in mind, let's see the results!
+
+<img width="867" height="543" alt="image" src="https://github.com/user-attachments/assets/679bd5f9-d6ae-481d-8aa0-55a70c6a7bfc" />
+
