@@ -5,6 +5,7 @@
 #include "Loading/STLLoader.h"
 #include "Geometry/Cube.h"
 #include "Geometry/Mesh.h"
+#include "Geometry/Scene.h"
 #include "Geometry/SceneObject.h"
 #include "Math/Transform.h"
 #include "Math/Vec3.h"
@@ -13,6 +14,7 @@
 #include "Rendering/Camera.h"
 #include "Rendering/Clipping.h"
 #include "Rendering/Culling.h"
+#include "Rendering/Lighting/Lambertian.h"
 
 int main(int argc, char* argv[])
 {
@@ -63,15 +65,14 @@ int main(int argc, char* argv[])
     Color red = {255, 0, 0};
     Color blue = {0, 255, 0};
     Color green = {0, 0, 255};
-    Color colors [3] = {red, blue, green};
-
     Color white = {255, 255, 255};
 
-    std::vector<SceneObject> objects;
+    Scene scene;
+    scene.directionalLights.push_back({Vec3{0, 1, -1}.normalized(), white});
+    scene.objects.push_back({createCube(), {0, 0, 5}, {toRadians(270.0f), 0, 0}, {1.0f, 1.0f, 1.0f}, {{255, 0, 0}}});
+    scene.objects.push_back({createCube(), {2, 0, 5}, {toRadians(270.0f), 0, 0}, {1.0f, 1.0f, 1.0f}, {{0, 255, 0}}});
+    scene.objects.push_back({createCube(), {-2, 0, 5}, {toRadians(270.0f), 0, 0}, {1.0f, 1.0f, 1.0f}, {{0, 0, 255}}});
     // objects.push_back({loadBinarySTL(R"(C:\Users\gamer\Documents\GitHub\ZERO\porolick.stl)"), {0, 0, 300}, {toRadians(270.0f), toRadians(0.0f), toRadians(0.0f)}, {0.1f, 0.1f, 0.1f}});
-    objects.push_back({createCube(), {0, 0, 5}, {toRadians(270.0f), toRadians(0.0f), toRadians(0.0f)}, {1.0f, 1.0f, 1.0f}});
-    objects.push_back({createCube(), {2, 0, 5}, {toRadians(270.0f), toRadians(0.0f), toRadians(0.0f)}, {1.0f, 1.0f, 1.0f}});
-    objects.push_back({createCube(), {-2, 0, 5}, {toRadians(270.0f), toRadians(0.0f), toRadians(0.0f)}, {1.0f, 1.0f, 1.0f}});
 
     std::cout << "Framebuffer created: "
               << framebuffer.getWidth() << "x"
@@ -125,7 +126,7 @@ int main(int argc, char* argv[])
         int colorPicker = 0;
         int culled = 0;
 
-        for (const SceneObject& object : objects) {
+        for (const SceneObject& object : scene.objects) {
 
             const Mesh& mesh = object.mesh;
             std::vector<Vec3> transformedVertices;
@@ -140,10 +141,22 @@ int main(int argc, char* argv[])
             }
 
             for (const Triangle& triangle : mesh.triangles) {
+
+                const Vec3& a = transformedVertices[triangle.a];
+                const Vec3& b = transformedVertices[triangle.b];
+                const Vec3& c = transformedVertices[triangle.c];
+
+                const Vec3 AB = b - a;
+                const Vec3 AC = c - a;
+                Vec3 normal = AB.cross(AC).normalized();
+
+                float intensity = calculateDiffuseIntensity(normal, scene.directionalLights[0].direction);
+                Color finalColor = calculateLambertianColor(object.material.albedo, scene.directionalLights[0].color, intensity);
+
                 Triangle3D cameraSpaceTriangle {
-                    camera.worldToCamera(transformedVertices[triangle.a]),
-                    camera.worldToCamera(transformedVertices[triangle.b]),
-                    camera.worldToCamera(transformedVertices[triangle.c])
+                    camera.worldToCamera(a),
+                    camera.worldToCamera(b),
+                    camera.worldToCamera(c)
                 };
 
                 std::vector<Triangle3D> clippedTriangles = clipTriangleAgainstNearPlane(cameraSpaceTriangle, camera.getNearPlane());
@@ -160,10 +173,9 @@ int main(int argc, char* argv[])
 
                     framebuffer.drawTriangle(
                         p1_projected, p2_projected, p3_projected, 
-                        clippedTriangle.a.z, clippedTriangle.b.z, clippedTriangle.c.z, colors[colorPicker++]
+                        clippedTriangle.a.z, clippedTriangle.b.z, clippedTriangle.c.z, finalColor
                     );
                     
-                    colorPicker %= 3;
                 }
 
             }

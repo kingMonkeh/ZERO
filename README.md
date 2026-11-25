@@ -170,3 +170,14 @@ With this, we are ready to implement near-plane clipping which will solve a lot 
 
 https://github.com/user-attachments/assets/04f12a25-3d79-493b-a21e-b5fd5a3dbee7
 
+**Let there be light**
+
+So far all the cubes we have been looking at looked pretty flat, mainly because there is no lighting...
+
+To this end, we now attempt to implement lighting, to start simple I implemented Lambertian lighting with directional light and flat shading. What is Lambertian lighting you might ask? It makes a key assumption that light is diffuse, that is when light hits a surface, it assumes the light will then reflect equally in all directions.
+
+Think about a flashlight, if you shine it straight at a wall, it will be very bright on a small area, on the other hand, if you tilt your flashlight, it will light up more of the wall, but the light is spread out more and not as intense. This is precisely what we will calculate to determine the intensity of light. Consider the normal vector of our surface, then consider the ray of light hitting our surface, we want to know the ratio, ie for a given amount of surface area, how much light will hit it? With some math it turns out this is equivalent to the dot product of the normal vector and the light vector. If you are interested in the math, I highly recommend watching this video: https://www.youtube.com/watch?v=xoLpDLeiAlU
+
+With this in mind, we now have the intensity of light. We now assume the existence of directional light, ie just assume there is some extremely powerful light that sends all of its light rays in the same direction, kinda like the sun since it is so far from us. Lastly, we also assume flat shading, ie you assume the intensity of light is the same for all the points on a triangle, which is why we only needed the triangles normal. This is not the most realistic and is probably what you see in old school video games.
+
+With all this in mind, let's see the results!
