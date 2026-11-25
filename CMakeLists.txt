@@ -41,6 +41,7 @@ add_executable(ZERO
     src/Rendering/Camera.cpp
     src/Rendering/Clipping.cpp
     src/Rendering/Culling.cpp
+    src/Rendering/DebugOverlay.cpp
     src/Rendering/Framebuffer.cpp
     src/Math/Vec3.cpp
 )

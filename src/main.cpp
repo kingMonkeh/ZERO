@@ -7,6 +7,7 @@
 #include "Geometry/Mesh.h"
 #include "Geometry/Scene.h"
 #include "Geometry/SceneObject.h"
+#include "Geometry/Sphere.h"
 #include "Math/Transform.h"
 #include "Math/Vec3.h"
 #include "Math/Utils.h"
@@ -14,6 +15,7 @@
 #include "Rendering/Camera.h"
 #include "Rendering/Clipping.h"
 #include "Rendering/Culling.h"
+#include "Rendering/DebugOverlay.h"
 #include "Rendering/Lighting/Lambertian.h"
 
 int main(int argc, char* argv[])
@@ -69,9 +71,10 @@ int main(int argc, char* argv[])
 
     Scene scene;
     scene.directionalLights.push_back({Vec3{0, 1, -1}.normalized(), white});
-    scene.objects.push_back({createCube(), {0, 0, 5}, {toRadians(270.0f), 0, 0}, {1.0f, 1.0f, 1.0f}, {{255, 0, 0}}});
-    scene.objects.push_back({createCube(), {2, 0, 5}, {toRadians(270.0f), 0, 0}, {1.0f, 1.0f, 1.0f}, {{0, 255, 0}}});
-    scene.objects.push_back({createCube(), {-2, 0, 5}, {toRadians(270.0f), 0, 0}, {1.0f, 1.0f, 1.0f}, {{0, 0, 255}}});
+    scene.objects.push_back({createCube(), {0, 0, 5}, {toRadians(270.0f), toRadians(30.0f), 0}, {1.0f, 1.0f, 1.0f}, {{255, 0, 0}}});
+    scene.objects.push_back({createCube(), {5, 0, 5}, {toRadians(255.0f), 0, 0}, {1.0f, 1.0f, 1.0f}, {{0, 255, 0}}});
+    scene.objects.push_back({createCube(), {-3, 0, 5}, {toRadians(270.0f), 0, 0}, {1.0f, 1.0f, 1.0f}, {{0, 0, 255}}});
+    scene.objects.push_back({createSphere(), {3, 0, 8}, {0, 0, 0}, {1.0f, 1.0f, 1.0f}, {255, 255, 0}});
     // objects.push_back({loadBinarySTL(R"(C:\Users\gamer\Documents\GitHub\ZERO\porolick.stl)"), {0, 0, 300}, {toRadians(270.0f), toRadians(0.0f), toRadians(0.0f)}, {0.1f, 0.1f, 0.1f}});
 
     std::cout << "Framebuffer created: "
@@ -81,6 +84,7 @@ int main(int argc, char* argv[])
     bool running = true;
     SDL_Event event;
     Uint64 previousCounter = SDL_GetPerformanceCounter();
+    DebugOverlay debugOverlay;
 
     while (running) {
         while (SDL_PollEvent(&event)) {
@@ -89,7 +93,6 @@ int main(int argc, char* argv[])
         }
 
         // Compute delta time
-
         Uint64 currentCounter = SDL_GetPerformanceCounter();
         float deltaTime = static_cast<float>(currentCounter - previousCounter) / SDL_GetPerformanceFrequency();
         previousCounter = currentCounter;
@@ -182,8 +185,11 @@ int main(int argc, char* argv[])
 
         }
 
-        // Display framebuffer
+        // Compute Debug Stats
+        debugOverlay.update(deltaTime);
+        debugOverlay.render(framebuffer);
 
+        // Display framebuffer
         SDL_UpdateTexture(
           texture,
           nullptr,
