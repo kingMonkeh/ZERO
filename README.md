@@ -191,4 +191,6 @@ You might have noticed in the video that any cube face that was not facing the l
 
 By updating our light calculations to also include the color and intensity of our ambient light, we now have a slightly less akward scene! (I also took the time to add a basic FPS counter, you can see our FPS isn't the best but we will deal with that later)
 
+https://github.com/user-attachments/assets/75a29613-69e9-46be-ace1-9b371017d6bd
+
 
