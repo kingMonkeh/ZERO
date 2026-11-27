@@ -184,3 +184,11 @@ With all this in mind, let's see the results!
 
 <img width="867" height="543" alt="image" src="https://github.com/user-attachments/assets/679bd5f9-d6ae-481d-8aa0-55a70c6a7bfc" />
 
+
+**Ambient Lighting**
+
+You might have noticed in the video that any cube face that was not facing the light was pitch black. While it is correct under our current lighting model, it's obviously not something you really see in real life, this is because light in real life would reflect off the cube, onto the walls, and back onto each other, giving every face a little bit of light. One way to fix this is to simulate every ray of light, this is actually the idea of ray tracing! Sadly we do not have that much compute, so a more scuffed idea is to implement an ambient light, which is essentially a global light that is applied to every surface, it will obviously not be very powerful since we just want enough to get rid of the akward pitch black faces.
+
+By updating our light calculations to also include the color and intensity of our ambient light, we now have a slightly less akward scene! (I also took the time to add a basic FPS counter, you can see our FPS isn't the best but we will deal with that later)
+
+

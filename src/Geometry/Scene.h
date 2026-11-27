@@ -8,4 +8,5 @@
 struct Scene {
     std::vector<SceneObject> objects;
     std::vector<DirectionalLight> directionalLights;
+    AmbientLight ambientLight;
 };

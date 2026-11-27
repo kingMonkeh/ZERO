@@ -70,6 +70,7 @@ int main(int argc, char* argv[])
     Color white = {255, 255, 255};
 
     Scene scene;
+    scene.ambientLight = {white, 0.12f};
     scene.directionalLights.push_back({Vec3{0, 1, -1}.normalized(), white});
     scene.objects.push_back({createCube(), {0, 0, 5}, {toRadians(270.0f), toRadians(30.0f), 0}, {1.0f, 1.0f, 1.0f}, {{255, 0, 0}}});
     scene.objects.push_back({createCube(), {5, 0, 5}, {toRadians(255.0f), 0, 0}, {1.0f, 1.0f, 1.0f}, {{0, 255, 0}}});
@@ -149,27 +150,29 @@ int main(int argc, char* argv[])
                 const Vec3& b = transformedVertices[triangle.b];
                 const Vec3& c = transformedVertices[triangle.c];
 
-                const Vec3 AB = b - a;
-                const Vec3 AC = c - a;
-                Vec3 normal = AB.cross(AC).normalized();
-
-                float intensity = calculateDiffuseIntensity(normal, scene.directionalLights[0].direction);
-                Color finalColor = calculateLambertianColor(object.material.albedo, scene.directionalLights[0].color, intensity);
-
                 Triangle3D cameraSpaceTriangle {
                     camera.worldToCamera(a),
                     camera.worldToCamera(b),
                     camera.worldToCamera(c)
                 };
 
+                // Back-face culling
+                if (isBackFacing(cameraSpaceTriangle.a, cameraSpaceTriangle.b, cameraSpaceTriangle.c, {0, 0, 0})) {
+                    culled++;
+                    continue;
+                }
+
+                // Lighting
+                const Vec3 AB = b - a;
+                const Vec3 AC = c - a;
+                Vec3 normal = AB.cross(AC).normalized();
+
+                Illumination illumination = calculateIllumination(normal, scene);
+                Color finalColor = applyIllumination(object.material.albedo, illumination);
+
                 std::vector<Triangle3D> clippedTriangles = clipTriangleAgainstNearPlane(cameraSpaceTriangle, camera.getNearPlane());
 
                 for (const Triangle3D& clippedTriangle : clippedTriangles) {
-                    if (isBackFacing(clippedTriangle.a, clippedTriangle.b, clippedTriangle.c, {0, 0, 0})) {
-                        culled++;
-                        continue;
-                    }
-
                     Vec2 p1_projected = camera.project(clippedTriangle.a, window_width, window_height);
                     Vec2 p2_projected = camera.project(clippedTriangle.b, window_width, window_height);
                     Vec2 p3_projected = camera.project(clippedTriangle.c, window_width, window_height);
